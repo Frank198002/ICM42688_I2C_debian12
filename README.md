@@ -468,3 +468,12 @@ The ICM42688 pins should be connected as:
 * CS: connect to chip select pin. Pin 10 was used in the code snippets in this document and the included examples, but any digital I/O pin can be used.
 
 Some breakout boards, including the Embedded Masters breakout board, require slight modification to enable SPI. Please refer to your vendor's documentation.
+
+
+
+##  generate exe file to run 
+cd /home/radxa/Workspace/ICM42688/src
+g++ main.cpp linux_i2c.cpp ICM42688.c -o imu_42688_linux \
+     -Iimu -I. \
+     -std=c++11 \
+     -lm -pthread

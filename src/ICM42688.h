@@ -1,12 +1,21 @@
 #ifndef ICM42688_H
 #define ICM42688_H
 
-#include "Arduino.h"
-#include "SPI.h"   // SPI library
-#include "Wire.h"  // I2C library
+// #include "Arduino.h"
+// #include "SPI.h"   // SPI library
+// #include "Wire.h"  // I2C library -yx260421
+
+
+// +yx260421
+#include <stdint.h>
+#include "linux_i2c.h"
+#include <cstddef>
+
 
 class ICM42688 {
  public:
+
+ 
 	enum GyroFS : uint8_t {
 		dps2000   = 0x00,
 		dps1000   = 0x01,
@@ -66,7 +75,10 @@ class ICM42688 {
      * @param      bus      I2C bus
      * @param[in]  address  Address of ICM 42688-p device
      */
-	ICM42688(TwoWire& bus, uint8_t address);
+	// ICM42688(TwoWire& bus, uint8_t address);		//-yx260421
+	ICM42688(const char* i2c_dev, uint8_t address); //+yx260421
+
+	~ICM42688();   // 👈 必须有析构函数
 
 	/**
      * @brief      Constructor for I2C communication using SDA, SCL pins
@@ -76,7 +88,7 @@ class ICM42688 {
      * @param[in]  sda_pin  GPIO pin to use for I2C SDA signal
      * @param[in]  scl_pin  GPIO pin to use for I2C SCL signal
      */
-	ICM42688(TwoWire& bus, uint8_t address, uint8_t sda_pin, uint8_t scl_pin);
+	// ICM42688(TwoWire& bus, uint8_t address, uint8_t sda_pin, uint8_t scl_pin);		//-yx260421
 
 	/**
      * @brief      Constructor for SPI communication
@@ -84,7 +96,7 @@ class ICM42688 {
      * @param      bus    SPI bus
      * @param[in]  csPin  Chip Select pin
      */
-	ICM42688(SPIClass& bus, uint8_t csPin, uint32_t spi_hs_clock = 8'000'000);
+	// ICM42688(SPIClass& bus, uint8_t csPin, uint32_t spi_hs_clock = 8000000);
 
 	/**
      * @brief      Initialize the device.
@@ -266,23 +278,26 @@ class ICM42688 {
 	void  setAccelCalX(float bias, float scaleFactor);
 	void  setAccelCalY(float bias, float scaleFactor);
 	void  setAccelCalZ(float bias, float scaleFactor);
+	void  calibrateGyroBias(float bias[3]); //+yx 260421 for bias
 
  protected:
 	///\brief I2C Communication
 	uint8_t                   _address  = 0;
-	TwoWire*                  _i2c      = {};
-	static constexpr uint32_t I2C_CLK   = 400'000;  // 400 kHz
+	// TwoWire*                  _i2c      = {};
+
+	LinuxI2C* _i2c_linux = nullptr;
+	static constexpr uint32_t I2C_CLK   = 400000;  // 400 kHz
 	size_t                    _numBytes = 0;        // number of bytes received from I2C
 
 	///\brief SPI Communication
-	SPIClass*                 _spi          = {};
+	// SPIClass*                 _spi          = {};
 	uint8_t                   _sda_pin      = 18;
 	uint8_t                   _scl_pin      = 19;
 	uint8_t                   _csPin        = 0;
 	bool                      _useSPI       = false;
 	bool                      _useSPIHS     = false;
-	static constexpr uint32_t SPI_LS_CLOCK  = 1'000'000;  // 1 MHz
-	uint32_t                  _spi_hs_clock = 8'000'000;  // 8 MHz
+	// static constexpr uint32_t SPI_LS_CLOCK  = 1000000;  // 1 MHz
+	// uint32_t                  _spi_hs_clock = 8000000;  // 8 MHz
 
 	// buffer for reading from sensor
 	uint8_t _buffer[15] = {};
